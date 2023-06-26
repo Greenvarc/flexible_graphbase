@@ -1,16 +1,17 @@
 import { getServerSession } from "next-auth/next";
-import { User, NextAuthOptions } from "next-auth";
-import { Adapter, AdapterUser } from "next-auth/adapters";
-import Googleprovider from 'next-auth/providers/google'
-import jsonwebtoken from "jsonwebtoken";
+import { NextAuthOptions, User } from "next-auth";
+import { AdapterUser } from "next-auth/adapters";
+import GoogleProvider from "next-auth/providers/google";
+import jsonwebtoken from 'jsonwebtoken'
 import { JWT } from "next-auth/jwt";
-import { SessionInterface } from "@/common.types";
 
+import { getUser } from "./actions";
+import { SessionInterface, UserProfile } from "@/common.types";
 
 
 export const authOptions: NextAuthOptions = {
     providers: [
-        Googleprovider({
+        GoogleProvider({
             clientId:process.env.GOOGLE_CLIENT_ID!,
             clientSecret:process.env.GOOGLE_CLIENT_CLIENT_KEY!,
         })
@@ -27,18 +28,19 @@ export const authOptions: NextAuthOptions = {
         async session({ session }) {
             return session
         },
-        async signIn({ user }:{user:AdapterUser|User}) {
+        async signIn({ user }: {
+            user: AdapterUser | User
+          }) {
             try {
-                // get usr if exist
-                
-                // if not create new 
-                return true
-            } catch (error:any) {
-                console.log('error signIn', error);
-                return false;
+              const userExists = await getUser(user?.email as string) as { user?: UserProfile }
+      
+              return true;
+            } catch (error: any) {
+              console.log("Error checking if user exists: ", error.message);
+              return false;
             }
-        }
-    }
+      },
+    },
 }
 
 // get current user func
