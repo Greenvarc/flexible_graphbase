@@ -32,6 +32,7 @@ export const authOptions: NextAuthOptions = {
             user: AdapterUser | User
           }) {
             try {
+                // get error while using this func (error gotten is Attempted import error: 'parse' is not exported from 'graphql' (imported as 'parse').
               const userExists = await getUser(user?.email as string) as { user?: UserProfile }
       
               return true;
